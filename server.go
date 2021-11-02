@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/benricheson101/discord-status/routes"
@@ -15,8 +14,6 @@ var tokenAuth = jwtauth.New("HS256", []byte("owo wats dis"), nil)
 
 func main() {
 	godotenv.Load("./.env")
-	_, tokenString, _ := tokenAuth.Encode(map[string]interface{}{"uid": 123})
-	fmt.Printf("DEBUG: a sample jwt is %s\n", tokenString)
 
 	r := chi.NewRouter()
 
