@@ -5,18 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/jwtauth/v5"
 
+	"github.com/benricheson101/discord-status/middleware"
 	"github.com/benricheson101/discord-status/models"
 )
 
 type OauthRoutes struct{}
-
-var tokenAuth = jwtauth.New("HS256", []byte("owo wats dis"), nil)
 
 func (rs OauthRoutes) Routes() chi.Router {
 	r := chi.NewRouter()
@@ -47,17 +44,14 @@ func (rs OauthRoutes) OAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, token, err := payload.ToJWT(*tokenAuth)
+	token, err := payload.ToJWT()
 	if err != nil {
 		writeError(w, err.Error())
 		return
 	}
 
-	tokenCookie := http.Cookie{Name: "jwt", Value: token, HttpOnly: true, Path: "/"}
+	tokenCookie := http.Cookie{Name: middleware.AUTH_COOKIE, Value: token, HttpOnly: true, Path: "/"}
 	http.SetCookie(w, &tokenCookie)
-
-	log.Printf("generated jwt=%v\n", token)
-	log.Printf("%v\n", token)
 
 	w.Write([]byte(fmt.Sprintf("Logged in as %v#%v!", user.Username, user.Discriminator)))
 }
@@ -73,7 +67,6 @@ func getUser(token string) (*models.DiscordUser, error) {
 	defer res.Body.Close()
 
 	body, _ := ioutil.ReadAll(res.Body)
-	log.Println(string(body))
 
 	var user models.DiscordUser
 	json.Unmarshal([]byte(body), &user)
@@ -102,7 +95,6 @@ func getUser(token string) (*models.DiscordUser, error) {
 func writeError(w http.ResponseWriter, errorMsg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	// w.Write([]byte(`{"error": "missing code in request"}`))
 	jsonPayload, _ := json.Marshal(map[string]string{
 		"error": errorMsg,
 	})

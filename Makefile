@@ -11,3 +11,7 @@ build: $(SERVER_BINARY)
 clean:
 	@go clean
 	@rm -f $(SERVER_BINARY)
+
+.PHONY: dev
+dev:
+	go run $(SERVER)
