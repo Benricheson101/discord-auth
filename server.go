@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/benricheson101/discord-status/routes"
@@ -19,6 +20,16 @@ func main() {
 
 	r.Mount("/auth", routes.OauthRoutes{}.Routes())
 	r.Mount("/admin", routes.AdminRoutes{}.Routes())
+	r.Get("/login", Login)
 
 	http.ListenAndServe(":3333", r)
 }
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	ref := r.Header.Get("Referer")
+	fmt.Printf("referer = %v\n", ref)
+	// w.Write([]byte("hi"))
+
+	http.Redirect(w, r, ref, 302)
+}
+

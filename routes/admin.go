@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -28,7 +29,22 @@ func (rs AdminRoutes) Routes() chi.Router {
 
 			w.Write([]byte(fmt.Sprintf("protected area. hi %v#%v", user.Username, user.Discriminator)))
 		})
+
+		r.Get("/users/@me", rs.GetUser)
 	})
 
 	return r
+}
+
+func (rs AdminRoutes) GetUser(w http.ResponseWriter, r *http.Request) {
+	token, ok := r.Context().Value(middleware.CTX_KEY_AUTH).(models.TokenExchangePayload)
+	if !ok {
+		return
+	}
+
+	user, _ := getUser(token.AccessToken)
+
+	w.Header().Set("Content-Type", "application/json")
+	data, _ := json.Marshal(user)
+	w.Write(data)
 }

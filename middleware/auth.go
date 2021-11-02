@@ -38,7 +38,7 @@ func RequireAuth(next http.Handler) http.Handler {
 			tokenString = r.Header.Get("Authorization")
 
 			if tokenString == "" {
-				http.Redirect(w, r, `https://discord.com/oauth2/authorize?client_id=641392996025106432&redirect_uri=http%3A%2F%2Flocalhost%3A3333%2Fauth%2Fcallback&response_type=code&scope=identify`, 302)
+				authFailed(w, "missing token in request")
 				return
 			}
 		} else {
